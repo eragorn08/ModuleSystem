@@ -15,7 +15,7 @@
            ORGANIZATION IS INDEXED
            ACCESS IS RANDOM
            RECORD KEY IS FD-STUDNUMBER
-           FILE STATUS IS WS-FILESTATUS2.
+           FILE STATUS IS WS-FILESTATUS2.    
 
        DATA DIVISION.
        FILE SECTION.
@@ -68,7 +68,7 @@
 
        01  WS-EOF PIC A(1).
        01  WS-MOD1 PIC 9.
-
+       
        PROCEDURE DIVISION.
        MAIN.
            PERFORM PARA-MENU WITH TEST BEFORE UNTIL QUIT = 1.
@@ -92,7 +92,7 @@
            ACCEPT WS-MENU.
 
            IF A
-              GO TO PARA-ADMIN
+              GO TO PARA-ADMIN 
            ELSE IF B
               GO TO PARA-TEACHER
            ELSE
@@ -284,6 +284,7 @@
            DISPLAY '*  => [A]   INPUT STUDENT DATA       *'.
            DISPLAY '*  => [B]   SEARCH STUDENT           *'.
            DISPLAY '*  => [C]   STUDENT LIST             *'.
+           DISPLAY '*  => [D]   STUDENT LIST             *'.
            DISPLAY '*  => [ANY] EXIT                     *'.
            DISPLAY '*                                    *'.
            DISPLAY '**************************************'.
@@ -325,15 +326,6 @@
            OPEN OUTPUT FD-STUDENT
                WRITE F-STUDENTINFO
            CLOSE FD-STUDENT.
-
-           DISPLAY "INPUT MODULE GRADE AGAIN?"
-           DISPLAY "[1] = YES"
-           DISPLAY "[ANY] = NO"
-           ACCEPT WS-MOD1
-           IF WS-MOD1 IS EQUAL TO 1
-               GO TO MODULE-PARA
-           ELSE
-               PERFORM MENU-TEACHER.
 
            DISPLAY "STUDENT DATA HAS BEEN RECORDED".
            GO TO MENU-TEACHER.
