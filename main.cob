@@ -108,7 +108,7 @@
            DISPLAY '**************************************'
            DISPLAY '*                                    *'
            DISPLAY '*            MAIN MENU               *'
-           DISPLAY '*   COBOL BANK TRANSACTION SYSTEM    *'
+           DISPLAY '*   COBOL EDUCATION MODULE SYSTEM    *'
            DISPLAY '*                                    *'
            DISPLAY '*  => [A]   ADMIN LOGIN              *'
            DISPLAY '*  => [B]   TEACHER LOGIN            *'
