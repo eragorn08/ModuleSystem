@@ -17,8 +17,15 @@
            ACCESS IS RANDOM
            RECORD KEY IS FD-STUDNUMBER
            FILE STATUS IS WS-FILESTATUS2.
+           
+           SELECT FD-SUMMARY ASSIGN TO 'SUMMARY.dat'
+           ORGANIZATION IS SEQUENTIAL
+           ACCESS IS SEQUENTIAL
+           FILE STATUS IS WS-FS.
+           
        DATA DIVISION.
        FILE SECTION.
+       
        FD  FD-TEACHER.
        01  F-TEACHERINFO.
            05 F-USERNAME PIC X(10).
@@ -34,6 +41,15 @@
            05 FD-MODULENUMB PIC 9(5).
            05 FD-GRADE PIC 9(3).
            05 FD-MODULESTATUS PIC X(9).
+           
+       FD FD-SUMMARY
+       01 F-SUMMARYINFO
+          05 FD-PASS PIC X(2).
+          05 FD-FAIL PIC X(2).
+          05 FD-SUBMITTED PIC X(2).
+          05 FD-NSUBMITTED PIC X(2).
+          05 FD-STUDENTS PIC X(2).
+       
        WORKING-STORAGE SECTION.
        01  WS-MENU        PIC A.
            88 A           VALUE 'A', 'a'.
@@ -45,18 +61,24 @@
            88 X           VALUE 'X', 'x'.
        01  QUIT            PIC 9  VALUE 0.
        01  WS-BLANK        PIC X(25) VALUE SPACES.
+*FILE STATUS
        01  WS-FILESTATUS PIC 9(2).
        01  WS-FILESTATUS2 PIC 9(2).
+       01  WS-FS PIC 9(2).
+*TRIGGER
        01  WS-FLAG PIC 9.
        01  WS-FLAG2 PIC 9.
+*ADMIN ACCOUNT       
        01  WS-ADMINUSERNAME PIC X(10).
        01  WS-ADMINPASSWORD PIC X(10).
        01  WS-PASSWORD-TEMP PIC X(10).
+*TEACHERS DATABASE
        01  WS-TEACHERINFO.
            05 WS-USERNAME PIC X(10).
            05 WS-PASSWORD PIC X(10).
            05 WS-TEACHERNAME PIC X(25).
            05 WS-SECTION PIC X(4).
+*STUDENTS DATABASE           
        01  WS-STUDINFO.
            05 WS-STUDNUMBER PIC 9(10).
            05 WS-STUDNAME PIC X(25).
@@ -66,11 +88,19 @@
            05 WS-MODULESTATUS PIC X(9).
        01  WS-EOF PIC A(1).
        01  WS-MOD1 PIC 9.
+*SUMMARIZED DATABASE       
+       01 SUMMARYINFO
+          05 PASS PIC X(2).
+          05 FAIL PIC X(2).
+          05 SUBMITTED PIC X(2).
+          05 NSUBMITTED PIC X(2).
+          05 STUDENTS PIC X(2).
 
        PROCEDURE DIVISION.
        MAIN.
            PERFORM PARA-MENU WITH TEST BEFORE UNTIL QUIT = 1.
            STOP RUN.
+           
        PARA-MENU.
            MOVE 0 TO QUIT
            DISPLAY WS-BLANK
@@ -95,6 +125,7 @@
            ELSE
                ADD 1 TO QUIT
            END-IF.
+           
        PARA-ADMIN.
            INITIALIZE WS-ADMINUSERNAME, WS-ADMINPASSWORD.
            DISPLAY WS-BLANK.
@@ -137,6 +168,7 @@
            ELSE
               GO TO PARA-MENU
            END-IF.
+           
        CREATE-TEACHER.
            DISPLAY WS-BLANK
            DISPLAY WS-BLANK
@@ -228,6 +260,7 @@
            GO TO PARA-ADMIN-DASHBOARD.
 
            CLOSE FD-TEACHER.
+           
        PARA-TEACHER.
            DISPLAY WS-BLANK
            DISPLAY '**************************************'
@@ -273,6 +306,7 @@
            DISPLAY '*  => [A]   INPUT STUDENT DATA       *'
            DISPLAY '*  => [B]   SEARCH STUDENT           *'
            DISPLAY '*  => [C]   STUDENT LIST             *'
+           DISPLAY '*  => [D]   SUMMARY                  *'
            DISPLAY '*  => [ANY] EXIT                     *'
            DISPLAY '*                                    *'
            DISPLAY '**************************************'
@@ -284,7 +318,7 @@
            ELSE IF B
               GO TO SEARCH-PARA
            ELSE IF C
-
+              GO TO PARA-MENU
            ELSE
               GO TO PARA-MENU
            END-IF.
@@ -300,7 +334,7 @@
            ACCEPT FD-STUDSECT
            DISPLAY '*  SUBMIT A MODULE?                  *'
            DISPLAY '*  [A] NO                            *'
-           DISPLAY '*  [ANY] YES                         *'
+           DISPLAY '*  [B] YES                         *'
            DISPLAY '*                                    *'
            DISPLAY '**************************************'
            DISPLAY '                                      '
@@ -315,7 +349,7 @@
                WRITE F-STUDENTINFO
                CLOSE FD-STUDENT
                GO TO MENU-TEACHER
-           ELSE
+           ELSE IF B
                GO TO MODULE-PARA
            END-IF
            OPEN OUTPUT FD-STUDENT
@@ -323,7 +357,6 @@
            CLOSE FD-STUDENT.
 
        MODULE-PARA.
-
            DISPLAY "ENTER MODULE NUMBER: "
            ACCEPT FD-MODULENUMB
            DISPLAY "ENTER MODULE GRADE: "
@@ -448,9 +481,6 @@
            ELSE
                GO TO MENU-TEACHER
            END-IF.
-
-
-
            MOVE F-STUDENTINFO TO WS-STUDINFO
            REWRITE F-STUDENTINFO FROM WS-STUDINFO
                NOT INVALID KEY DISPLAY "DATA UPDATED."
