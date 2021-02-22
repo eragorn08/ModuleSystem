@@ -1,6 +1,7 @@
        IDENTIFICATION DIVISION.
        PROGRAM-ID. MODULESYSTEM.
        AUTHOR. GROUP1.
+
        ENVIRONMENT DIVISION.
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
@@ -11,45 +12,44 @@
            RECORD KEY IS F-USERNAME
            FILE STATUS IS WS-FILESTATUS.
 
-
            SELECT FD-STUDENT ASSIGN TO 'STUDENT.dat'
            ORGANIZATION IS INDEXED
            ACCESS IS RANDOM
-           RECORD KEY IS FD-STUDNUMBER
+           RECORD KEY IS F-STUDNUMBER
            FILE STATUS IS WS-FILESTATUS2.
-           
+
            SELECT FD-SUMMARY ASSIGN TO 'SUMMARY.dat'
            ORGANIZATION IS SEQUENTIAL
            ACCESS IS SEQUENTIAL
            FILE STATUS IS WS-FS.
-           
+
        DATA DIVISION.
        FILE SECTION.
-       
+
        FD  FD-TEACHER.
        01  F-TEACHERINFO.
            05 F-USERNAME PIC X(10).
            05 F-PASSWORD PIC X(10).
            05 F-TEACHERNAME PIC X(25).
+           05 F-SECTION PIC X(6).
 
-           05 F-SECTION PIC X(4).
        FD  FD-STUDENT.
        01  F-STUDENTINFO.
-           05 FD-STUDNUMBER PIC 9(10).
-           05 FD-STUDNAME PIC X(25).
-           05 FD-STUDSECT PIC X(5).
-           05 FD-MODULENUMB PIC 9(5).
-           05 FD-GRADE PIC 9(3).
-           05 FD-MODULESTATUS PIC X(9).
-           
-       FD FD-SUMMARY
-       01 F-SUMMARYINFO
+           05 F-STUDNUMBER PIC 9(10).
+           05 F-STUDNAME PIC X(25).
+           05 F-STUDSECT PIC X(6).
+           05 F-MODULENUMB PIC 9(4).
+           05 F-GRADE PIC 9(3).
+           05 F-MODULESTATUS PIC X(9).
+
+       FD FD-SUMMARY.
+       01 F-SUMMARYINFO.
           05 FD-PASS PIC X(2).
           05 FD-FAIL PIC X(2).
           05 FD-SUBMITTED PIC X(2).
           05 FD-NSUBMITTED PIC X(2).
           05 FD-STUDENTS PIC X(2).
-       
+
        WORKING-STORAGE SECTION.
        01  WS-MENU        PIC A.
            88 A           VALUE 'A', 'a'.
@@ -59,26 +59,32 @@
            88 E           VALUE 'E', 'e'.
            88 G           VALUE 'G', 'g'.
            88 X           VALUE 'X', 'x'.
+
        01  QUIT            PIC 9  VALUE 0.
        01  WS-BLANK        PIC X(25) VALUE SPACES.
-*FILE STATUS
+
+      *FILE STATUS
        01  WS-FILESTATUS PIC 9(2).
        01  WS-FILESTATUS2 PIC 9(2).
        01  WS-FS PIC 9(2).
-*TRIGGER
+
+      *TRIGGER
        01  WS-FLAG PIC 9.
        01  WS-FLAG2 PIC 9.
-*ADMIN ACCOUNT       
+
+      *ADMIN ACCOUNT
        01  WS-ADMINUSERNAME PIC X(10).
        01  WS-ADMINPASSWORD PIC X(10).
        01  WS-PASSWORD-TEMP PIC X(10).
-*TEACHERS DATABASE
+
+      *TEACHERS DATABASE
        01  WS-TEACHERINFO.
            05 WS-USERNAME PIC X(10).
            05 WS-PASSWORD PIC X(10).
            05 WS-TEACHERNAME PIC X(25).
-           05 WS-SECTION PIC X(4).
-*STUDENTS DATABASE           
+           05 WS-SECTION PIC X(6).
+
+      *STUDENTS DATABASE
        01  WS-STUDINFO.
            05 WS-STUDNUMBER PIC 9(10).
            05 WS-STUDNAME PIC X(25).
@@ -86,38 +92,44 @@
            05 WS-MODULENUMB PIC 9(4).
            05 WS-GRADE PIC 9(3).
            05 WS-MODULESTATUS PIC X(9).
+
        01  WS-EOF PIC A(1).
        01  WS-MOD1 PIC 9.
-*SUMMARIZED DATABASE       
-       01 SUMMARYINFO
+       01  WS-NUM PIC 9(2).
+       01  WS-MODULE PIC 9(4).
+
+      *SUMMARIZED DATABASE
+       01 SUMMARYINFO.
           05 PASS PIC X(2).
           05 FAIL PIC X(2).
           05 SUBMITTED PIC X(2).
           05 NSUBMITTED PIC X(2).
           05 STUDENTS PIC X(2).
 
+
        PROCEDURE DIVISION.
        MAIN.
            PERFORM PARA-MENU WITH TEST BEFORE UNTIL QUIT = 1.
            STOP RUN.
-           
+
        PARA-MENU.
-           MOVE 0 TO QUIT
-           DISPLAY WS-BLANK
-           DISPLAY WS-BLANK
-           DISPLAY '**************************************'
-           DISPLAY '*                                    *'
-           DISPLAY '*            MAIN MENU               *'
+           MOVE 0 TO QUIT.
+           DISPLAY WS-BLANK.
+           DISPLAY WS-BLANK.
+           DISPLAY '**************************************'.
+           DISPLAY '*                                    *'.
+           DISPLAY '*            MAIN MENU               *'.
            DISPLAY '*   COBOL EDUCATION MODULE SYSTEM    *'
-           DISPLAY '*                                    *'
-           DISPLAY '*  => [A]   ADMIN LOGIN              *'
-           DISPLAY '*  => [B]   TEACHER LOGIN            *'
-           DISPLAY '*  => [ANY] EXIT                     *'
-           DISPLAY '*                                    *'
-           DISPLAY '**************************************'
-           DISPLAY '                                      '
-           DISPLAY '       CHOOSE AN OPERATION: '
+           DISPLAY '*                                    *'.
+           DISPLAY '*  => [A]   ADMIN LOGIN              *'.
+           DISPLAY '*  => [B]   TEACHER LOGIN            *'.
+           DISPLAY '*  => [ANY] EXIT                     *'.
+           DISPLAY '*                                    *'.
+           DISPLAY '**************************************'.
+           DISPLAY '                                      '.
+           DISPLAY '       CHOOSE AN OPERATION: ' .
            ACCEPT WS-MENU.
+
            IF A
               GO TO PARA-ADMIN
            ELSE IF B
@@ -125,20 +137,22 @@
            ELSE
                ADD 1 TO QUIT
            END-IF.
-           
+
+
        PARA-ADMIN.
            INITIALIZE WS-ADMINUSERNAME, WS-ADMINPASSWORD.
            DISPLAY WS-BLANK.
-           DISPLAY '**************************************'
-           DISPLAY '*                                    *'
-           DISPLAY '*        ADMINISTRATOR LOGIN         *'
-           DISPLAY '*                                    *'
-           DISPLAY '*  USERNAME: '
-           ACCEPT WS-ADMINUSERNAME
-           DISPLAY '*  PASSWORD: '
-           ACCEPT WS-ADMINPASSWORD
-           DISPLAY '*                                    *'
-           DISPLAY '**************************************'
+           DISPLAY '**************************************'.
+           DISPLAY '*                                    *'.
+           DISPLAY '*        ADMINISTRATOR LOGIN         *'.
+           DISPLAY '*                                    *'.
+           DISPLAY '*  USERNAME: ' .
+           ACCEPT WS-ADMINUSERNAME.
+           DISPLAY '*  PASSWORD: ' .
+           ACCEPT WS-ADMINPASSWORD.
+           DISPLAY '*                                    *'.
+           DISPLAY '**************************************'.
+
            IF WS-ADMINUSERNAME="ADMIN" AND WS-ADMINPASSWORD="ADMIN"
                GO TO PARA-ADMIN-DASHBOARD
            ELSE
@@ -146,21 +160,22 @@
                GO TO MAIN
            END-IF.
 
+
        PARA-ADMIN-DASHBOARD.
            DISPLAY WS-BLANK.
-           DISPLAY '**************************************'
-           DISPLAY '*                                    *'
-           DISPLAY '*      ADMINISTRATOR DASHBOARD       *'
-           DISPLAY '*                                    *'
-           DISPLAY '*  => [A]   CREATE TEACHER ACCOUNT   *'
-           DISPLAY '*  => [B]   EDIT TEACHER DATA        *'
-           DISPLAY '*  => [ANY] EXIT                     *'
-           DISPLAY '*                                    *'
-           DISPLAY '**************************************'
-           DISPLAY '                                      '
-           DISPLAY '       CHOOSE AN OPERATION: '
-
+           DISPLAY '**************************************'.
+           DISPLAY '*                                    *'.
+           DISPLAY '*      ADMINISTRATOR DASHBOARD       *'.
+           DISPLAY '*                                    *'.
+           DISPLAY '*  => [A]   CREATE TEACHER ACCOUNT   *'.
+           DISPLAY '*  => [B]   EDIT TEACHER DATA        *'.
+           DISPLAY '*  => [ANY] EXIT                     *'.
+           DISPLAY '*                                    *'.
+           DISPLAY '**************************************'.
+           DISPLAY '                                      '.
+           DISPLAY '       CHOOSE AN OPERATION: ' .
            ACCEPT WS-MENU.
+
            IF A
               GO TO CREATE-TEACHER
            ELSE IF B
@@ -168,24 +183,30 @@
            ELSE
               GO TO PARA-MENU
            END-IF.
-           
+
+
        CREATE-TEACHER.
-           DISPLAY WS-BLANK
-           DISPLAY WS-BLANK
+           DISPLAY WS-BLANK.
+           DISPLAY WS-BLANK.
            DISPLAY "USERNAME: "
-           ACCEPT F-USERNAME
+           ACCEPT F-USERNAME.
            DISPLAY "PASSWORD: "
-           ACCEPT F-PASSWORD
+           ACCEPT F-PASSWORD.
            DISPLAY "FIRST & LAST NAME: "
-           ACCEPT F-TEACHERNAME
+           ACCEPT F-TEACHERNAME.
            DISPLAY "SECTION: "
-           ACCEPT F-SECTION
-           OPEN OUTPUT FD-TEACHER
-               WRITE F-TEACHERINFO
-               END-WRITE.
+           ACCEPT F-SECTION.
+
+           OPEN I-O FD-TEACHER
+           IF WS-FILESTATUS = 35 THEN
+               OPEN OUTPUT FD-TEACHER
+           END-IF
+           WRITE F-TEACHERINFO
            CLOSE FD-TEACHER.
+
            DISPLAY "ACCOUNT CREATION SUCCESSFUL."
            GO TO PARA-ADMIN-DASHBOARD.
+
 
        EDIT-TEACHER.
            INITIALIZE WS-TEACHERINFO, F-TEACHERINFO
@@ -219,6 +240,7 @@
 
            DISPLAY WS-BLANK
            DISPLAY WS-BLANK
+
            IF A
                DISPLAY "NEW NAME: "
                ACCEPT F-TEACHERNAME
@@ -251,28 +273,28 @@
 
            MOVE F-TEACHERINFO TO WS-TEACHERINFO
 
-           MOVE F-TEACHERINFO TO WS-TEACHERINFO
            REWRITE F-TEACHERINFO FROM WS-TEACHERINFO
                NOT INVALID KEY DISPLAY "ACCOUNT UPDATED."
            END-REWRITE
 
-
            GO TO PARA-ADMIN-DASHBOARD.
 
            CLOSE FD-TEACHER.
-           
+
+
        PARA-TEACHER.
-           DISPLAY WS-BLANK
-           DISPLAY '**************************************'
-           DISPLAY '*                                    *'
-           DISPLAY '*        TEACHER LOGIN PORTAL        *'
-           DISPLAY '*                                    *'
-           DISPLAY '*  USERNAME: '
-           ACCEPT F-USERNAME
-           DISPLAY '*  PASSWORD: '
-           ACCEPT WS-PASSWORD-TEMP
-           DISPLAY '*                                    *'
-           DISPLAY '**************************************'
+           DISPLAY WS-BLANK.
+           DISPLAY '**************************************'.
+           DISPLAY '*                                    *'.
+           DISPLAY '*        TEACHER LOGIN PORTAL        *'.
+           DISPLAY '*                                    *'.
+           DISPLAY '*  USERNAME: ' .
+           ACCEPT F-USERNAME.
+           DISPLAY '*  PASSWORD: ' .
+           ACCEPT WS-PASSWORD-TEMP.
+           DISPLAY '*                                    *'.
+           DISPLAY '**************************************'.
+
            OPEN INPUT FD-TEACHER
            IF WS-FILESTATUS NOT EQUAL TO 35
                READ FD-TEACHER INTO WS-TEACHERINFO
@@ -283,6 +305,7 @@
                DISPLAY "ACCOUNT DATABASE IS EMPTY."
                GO TO MAIN
            END-IF.
+
            IF WS-FLAG = 1
                IF WS-PASSWORD-TEMP = WS-PASSWORD
                    DISPLAY "LOGGED IN"
@@ -295,43 +318,50 @@
                DISPLAY "ACCOUNT NOT FOUND"
                GO TO MAIN
            END-IF.
+
            CLOSE FD-TEACHER.
+
 
        MENU-TEACHER.
            DISPLAY WS-BLANK.
-           DISPLAY '**************************************'
-           DISPLAY '*                                    *'
-           DISPLAY '*          TEACHERS MENU             *'
-           DISPLAY '*                                    *'
-           DISPLAY '*  => [A]   INPUT STUDENT DATA       *'
-           DISPLAY '*  => [B]   SEARCH STUDENT           *'
-           DISPLAY '*  => [C]   STUDENT LIST             *'
+           DISPLAY '**************************************'.
+           DISPLAY '*                                    *'.
+           DISPLAY '*          TEACHERS MENU             *'.
+           DISPLAY '*                                    *'.
+           DISPLAY '*  => [A]   INPUT STUDENT DATA       *'.
+           DISPLAY '*  => [B]   SEARCH STUDENT           *'.
+           DISPLAY '*  => [C]   STUDENT LIST             *'.
            DISPLAY '*  => [D]   SUMMARY                  *'
-           DISPLAY '*  => [ANY] EXIT                     *'
-           DISPLAY '*                                    *'
-           DISPLAY '**************************************'
-           DISPLAY '                                      '
-           DISPLAY '       CHOOSE AN OPERATION: '
+           DISPLAY '*  => [ANY] EXIT                     *'.
+           DISPLAY '*                                    *'.
+           DISPLAY '**************************************'.
+           DISPLAY '                                      '.
+           DISPLAY '       CHOOSE AN OPERATION: ' .
            ACCEPT WS-MENU.
+
            IF A
-              GO TO STUDENT-DATA
+               GO TO STUDENT-DATA
            ELSE IF B
-              GO TO SEARCH-PARA
+               GO TO SEARCH-PARA
            ELSE IF C
-              GO TO PARA-MENU
+               GO TO STUDENT-LIST
            ELSE
-              GO TO PARA-MENU
+               GO TO MAIN
            END-IF.
 
+
        STUDENT-DATA.
+           INITIALIZE F-STUDENTINFO
+           DISPLAY WS-BLANK
+           DISPLAY WS-BLANK
            DISPLAY '**************************************'
            DISPLAY '*                                    *'
-           DISPLAY '*  ENTER STUDENT NUMBER:'
-           ACCEPT FD-STUDNUMBER
-           DISPLAY '*  ENTER STUDENT NAME:'
-           ACCEPT FD-STUDNAME
-           DISPLAY '*  ENTER STUDENT SECTION:'
-           ACCEPT FD-STUDSECT
+           DISPLAY "ENTER STUDENT NUMBER".
+           ACCEPT F-STUDNUMBER.
+           DISPLAY "ENTER STUDENT NAME".
+           ACCEPT F-STUDNAME.
+           DISPLAY "ENTER STUDENT SECTION".
+           ACCEPT F-STUDSECT.
            DISPLAY '*  SUBMIT A MODULE?                  *'
            DISPLAY '*  [A] NO                            *'
            DISPLAY '*  [B] YES                         *'
@@ -342,43 +372,55 @@
            ACCEPT WS-MENU
 
            IF A
-               MOVE 'NOT YET' TO FD-MODULESTATUS
-               MOVE 0 TO FD-MODULENUMB
-               MOVE 0 TO FD-GRADE
-               OPEN OUTPUT FD-STUDENT
+               MOVE 'NOT YET' TO F-MODULESTATUS
+               MOVE 0 TO F-MODULENUMB
+               MOVE 0 TO F-GRADE
+
+               OPEN I-O FD-STUDENT
+               IF WS-FILESTATUS2 = 35 THEN
+                   OPEN OUTPUT FD-STUDENT
+               END-IF
                WRITE F-STUDENTINFO
                CLOSE FD-STUDENT
+
                GO TO MENU-TEACHER
            ELSE IF B
                GO TO MODULE-PARA
+           END-IF.
+
+           OPEN I-O FD-STUDENT
+           IF WS-FILESTATUS2 = 35 THEN
+               OPEN OUTPUT FD-STUDENT
            END-IF
-           OPEN OUTPUT FD-STUDENT
-               WRITE F-STUDENTINFO
+           WRITE F-STUDENTINFO
            CLOSE FD-STUDENT.
 
-       MODULE-PARA.
-           DISPLAY "ENTER MODULE NUMBER: "
-           ACCEPT FD-MODULENUMB
-           DISPLAY "ENTER MODULE GRADE: "
-           ACCEPT FD-GRADE
 
-           MOVE 'SUBMITTED' TO FD-MODULESTATUS
-           OPEN OUTPUT FD-STUDENT
+       MODULE-PARA.
+           DISPLAY "ENTER MODULE NUMBER".
+           ACCEPT F-MODULENUMB.
+           DISPLAY "ENTER MODULE GRADE".
+           ACCEPT F-GRADE.
+
+           MOVE 'SUBMITTED' TO F-MODULESTATUS
+
+           OPEN I-O FD-STUDENT
                WRITE F-STUDENTINFO
            CLOSE FD-STUDENT.
 
            DISPLAY "STUDENT DATA HAS BEEN RECORDED"
            GO TO MENU-TEACHER.
 
+
        SEARCH-PARA.
-           INITIALIZE FD-STUDNUMBER
+           INITIALIZE F-STUDENTINFO
            DISPLAY WS-BLANK
-           DISPLAY "ENTER STUDENT NUMBER: "
-           ACCEPT FD-STUDNUMBER
+           DISPLAY "ENTER STUDENT NUMBER: ".
+           ACCEPT F-STUDNUMBER
            OPEN I-O FD-STUDENT
            IF WS-FILESTATUS2 NOT EQUAL TO 35
                READ FD-STUDENT INTO WS-STUDINFO
-                   KEY IS FD-STUDNUMBER
+                   KEY IS F-STUDNUMBER
            INVALID KEY DISPLAY "NOT FOUND." GO TO MENU-TEACHER
                END-READ
            ELSE
@@ -386,8 +428,8 @@
                GO TO MENU-TEACHER
            END-IF.
            DISPLAY WS-BLANK
-           DISPLAY '**************************************'
-           DISPLAY '*                                    *'
+           DISPLAY '**************************************'.
+           DISPLAY '*                                    *'.
            DISPLAY "*  STUDENT INFO: "
            DISPLAY "*  STUDENT NUMBER: " WS-STUDNUMBER
            DISPLAY "*  STUDENT NAME: " WS-STUDNAME
@@ -399,9 +441,9 @@
            DISPLAY '*                                    *'
            DISPLAY '*  EDIT DATA OF STUDENT?             *'
            DISPLAY '*  [A] YES                           *'
-           DISPLAY '*  [ANY] TO EXIT                     *'
-           DISPLAY '*                                    *'
-           DISPLAY '**************************************'
+           DISPLAY "*  [ANY] TO EXIT"
+           DISPLAY '*                                    *'.
+           DISPLAY '**************************************'.
            DISPLAY '                                      '
            DISPLAY '       CHOOSE AN OPERATION: '
            ACCEPT WS-MENU
@@ -409,7 +451,9 @@
                GO TO EDIT-STUDENT
            ELSE
                GO TO MENU-TEACHER
+           END-IF.
            CLOSE FD-STUDENT.
+
 
        EDIT-STUDENT.
            INITIALIZE WS-STUDINFO, F-STUDENTINFO
@@ -417,12 +461,12 @@
            DISPLAY WS-BLANK
            DISPLAY WS-BLANK
            DISPLAY "ENTER STUDENT NUMBER: "
-           ACCEPT FD-STUDNUMBER
+           ACCEPT F-STUDNUMBER
 
            OPEN I-O FD-STUDENT
            IF WS-FILESTATUS NOT EQUAL TO 35
                READ FD-STUDENT INTO WS-STUDINFO
-                   KEY IS FD-STUDNUMBER
+                   KEY IS F-STUDNUMBER
            INVALID KEY DISPLAY "NOT FOUND." GO TO MENU-TEACHER
                END-READ
            ELSE
@@ -447,24 +491,23 @@
            DISPLAY WS-BLANK
            IF A
                DISPLAY "NEW STUDENT NUMBER: "
-               ACCEPT FD-STUDNUMBER
+               ACCEPT F-STUDNUMBER
            ELSE IF B
                DISPLAY "NEW STUDENT NAME: "
-               ACCEPT FD-STUDNAME
+               ACCEPT F-STUDNAME
            ELSE IF C
                DISPLAY "NEW STUDENT SECTION: "
-               ACCEPT FD-STUDSECT
+               ACCEPT F-STUDSECT
            ELSE IF D
                DISPLAY "NEW MODULE STATUS:  "
-               ACCEPT FD-MODULESTATUS
+               ACCEPT F-MODULESTATUS
            ELSE IF E
                DISPLAY "NEW MODULE NUMBER: "
-               ACCEPT FD-MODULENUMB
+               ACCEPT F-MODULENUMB
            ELSE IF G
                DISPLAY "NEW GRADE: "
-               ACCEPT FD-GRADE
+               ACCEPT F-GRADE
            ELSE IF X
-
                DISPLAY "ARE YOU SURE?"
                DISPLAY "[A] => YES"
                DISPLAY "[ANY] => EXIT"
@@ -488,3 +531,79 @@
 
            GO TO REPEAT-EDIT
            CLOSE FD-STUDENT.
+
+
+       REPEAT-EDIT.
+           DISPLAY "WANT TO EDIT DATA AGAIN?"
+           DISPLAY "[A] NO "
+           DISPLAY "[ANY] YES"
+           DISPLAY '                                      '
+           DISPLAY 'CHOOSE AN OPERATION: '
+           ACCEPT WS-MENU
+           IF A
+               GO TO MENU-TEACHER
+           ELSE
+               GO TO SEARCH-PARA
+           END-IF.
+
+
+       STUDENT-LIST.
+           
+      *LIST BY SECTION (DEFAULT=SECTION OF TEACHER)
+       
+           INITIALIZE WS-STUDINFO, F-STUDENTINFO
+
+           DISPLAY WS-BLANK
+           DISPLAY "SECTION: " F-SECTION
+           DISPLAY "TEACHER: " F-TEACHERNAME.
+
+           MOVE F-SECTION TO F-STUDSECT
+           MOVE "T" TO WS-EOF
+           MOVE 1 TO WS-NUM
+
+           OPEN INPUT FD-STUDENT
+           PERFORM UNTIL WS-EOF = "F"
+               READ FD-STUDENT NEXT RECORD INTO WS-STUDINFO
+                   AT END MOVE "F" TO WS-EOF
+               END-READ
+               
+               IF WS-STUDSECT = F-SECTION
+                   DISPLAY "[" WS-NUM "]" WS-STUDINFO
+                   ADD 1 TO WS-NUM
+               END-IF
+
+           END-PERFORM
+           CLOSE FD-STUDENT.
+           
+           
+      *LIST BY MODULE NUMBER
+          
+           DISPLAY WS-BLANK
+           DISPLAY WS-BLANK
+           
+           DISPLAY "MODULE NUMBER: "
+           ACCEPT WS-MODULE
+           
+           DISPLAY "MODULE: " WS-MODULE
+
+           MOVE WS-MODULE TO F-MODULENUMB
+           MOVE 1 TO WS-NUM
+           MOVE "T" TO WS-EOF
+           
+           OPEN INPUT FD-STUDENT
+           PERFORM UNTIL WS-EOF = "F"
+               READ FD-STUDENT NEXT RECORD INTO WS-STUDINFO
+                   AT END MOVE "F" TO WS-EOF
+               END-READ
+               
+               IF F-MODULENUMB = WS-MODULE
+                   DISPLAY "[" WS-NUM "]" WS-STUDINFO
+                   ADD 1 TO WS-NUM
+               END-IF
+               
+               
+           END-PERFORM
+           CLOSE FD-STUDENT.
+           
+           GO TO MENU-TEACHER.
+           
