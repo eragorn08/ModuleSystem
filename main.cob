@@ -488,17 +488,3 @@
 
            GO TO REPEAT-EDIT
            CLOSE FD-STUDENT.
-
-       REPEAT-EDIT.
-           DISPLAY "WANT TO EDIT DATA AGAIN?"
-           DISPLAY "[A] NO "
-           DISPLAY "[ANY] YES"
-           DISPLAY '                                      '
-           DISPLAY 'CHOOSE AN OPERATION: '
-           ACCEPT WS-MENU
-           IF A
-               GO TO MENU-TEACHER
-           ELSE
-               GO TO SEARCH-PARA
-           END-IF.
-
