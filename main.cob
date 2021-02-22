@@ -14,8 +14,13 @@
            SELECT FD-STUDENT ASSIGN TO 'STUDENT.dat'
            ORGANIZATION IS INDEXED
            ACCESS IS RANDOM
+<<<<<<< HEAD
            RECORD KEY IS FD-STUDNUMBER
            FILE STATUS IS WS-FILESTATUS2.    
+=======
+           RECORD KEY IS F-STUDNUMBER
+           FILE STATUS IS WS-FILESTATUS2.
+>>>>>>> ae673114ce21aa93c197810bf54749d7030e9acf
 
        DATA DIVISION.
        FILE SECTION.
@@ -24,15 +29,15 @@
            05 F-USERNAME PIC X(10).
            05 F-PASSWORD PIC X(10).
            05 F-TEACHERNAME PIC X(25).
-           05 F-SECTION PIC X(4).
+           05 F-SECTION PIC 9(2).
 
        FD  FD-STUDENT.
        01  F-STUDENTINFO.
-           05 FD-STUDNUMBER PIC 9(10).
-           05 FD-STUDNAME PIC X(25).
-           05 FD-STUDSECT PIC X(5).
-           05 FD-MODULENUMB PIC 9(5).
-           05 FD-GRADE PIC 9(3).
+           05 F-STUDNUMBER PIC 9(10).
+           05 F-STUDNAME PIC X(25).
+           05 F-STUDSECT PIC 9(2).
+           05 F-MODULENUMB PIC 9(5).
+           05 F-GRADE PIC 9(3).
 
        WORKING-STORAGE SECTION.
        01  WS-MENU        PIC A.
@@ -49,6 +54,7 @@
        01  WS-FLAG PIC 9.
        01  WS-FLAG2 PIC 9.
 
+
        01  WS-ADMINUSERNAME PIC X(10).
        01  WS-ADMINPASSWORD PIC X(10).
        01  WS-PASSWORD-TEMP PIC X(10).
@@ -57,30 +63,33 @@
            05 WS-USERNAME PIC X(10).
            05 WS-PASSWORD PIC X(10).
            05 WS-TEACHERNAME PIC X(25).
-           05 WS-SECTION PIC X(4).
+           05 WS-SECTION PIC 9(2).
 
        01  WS-STUDINFO.
            05 WS-STUDNUMBER PIC 9(10).
            05 WS-STUDNAME PIC X(25).
-           05 WS-STUDSECT PIC X(7).
+           05 WS-STUDSECT PIC 9(2).
            05 WS-MODULENUMB PIC 9(5).
            05 WS-GRADE PIC 9(3).
 
-       01  WS-EOF PIC A(1).
        01  WS-MOD1 PIC 9.
+<<<<<<< HEAD
        
+=======
+
+
+>>>>>>> ae673114ce21aa93c197810bf54749d7030e9acf
        PROCEDURE DIVISION.
        MAIN.
            PERFORM PARA-MENU WITH TEST BEFORE UNTIL QUIT = 1.
            STOP RUN.
 
        PARA-MENU.
-           MOVE 0 TO QUIT
            DISPLAY WS-BLANK.
            DISPLAY WS-BLANK.
            DISPLAY '**************************************'.
            DISPLAY '*                                    *'.
-           DISPLAY '*   COBOL BANK TRANSACTION SYSTEM    *'.
+           DISPLAY '*            MAIN MENU               *'.
            DISPLAY '*                                    *'.
            DISPLAY '*  => [A]   ADMIN LOGIN              *'.
            DISPLAY '*  => [B]   TEACHER LOGIN            *'.
@@ -108,9 +117,9 @@
            DISPLAY '*                                    *'.
            DISPLAY '*        ADMINISTRATOR LOGIN         *'.
            DISPLAY '*                                    *'.
-           DISPLAY '*  USERNAME: '
+           DISPLAY '*  USERNAME: ' .
            ACCEPT WS-ADMINUSERNAME.
-           DISPLAY '*  PASSWORD: '
+           DISPLAY '*  PASSWORD: ' .
            ACCEPT WS-ADMINPASSWORD.
            DISPLAY '*                                    *'.
            DISPLAY '**************************************'.
@@ -118,10 +127,10 @@
            IF WS-ADMINUSERNAME="ADMIN" AND WS-ADMINPASSWORD="ADMIN"
                GO TO PARA-ADMIN-DASHBOARD
            ELSE
-               DISPLAY "Incorrect User or Pass"
-               GO TO PARA-MENU
-
+               DISPLAY "ACCOUNT DOES NOT EXIST."
+               GO TO MAIN
            END-IF.
+
 
        PARA-ADMIN-DASHBOARD.
            DISPLAY WS-BLANK.
@@ -135,7 +144,7 @@
            DISPLAY '*                                    *'.
            DISPLAY '**************************************'.
            DISPLAY '                                      '.
-           DISPLAY '       CHOOSE AN OPERATION: '
+           DISPLAY '       CHOOSE AN OPERATION: ' .
            ACCEPT WS-MENU.
 
            IF A
@@ -161,7 +170,6 @@
 
            OPEN OUTPUT FD-TEACHER
                WRITE F-TEACHERINFO
-               END-WRITE.
            CLOSE FD-TEACHER.
 
            DISPLAY "ACCOUNT CREATION SUCCESSFUL."
@@ -199,6 +207,7 @@
            MOVE WS-TEACHERINFO TO F-TEACHERINFO
 
            DISPLAY WS-BLANK
+
            IF A
                DISPLAY "NEW NAME: "
                ACCEPT F-TEACHERNAME
@@ -235,8 +244,8 @@
                NOT INVALID KEY DISPLAY "ACCOUNT UPDATED."
            END-REWRITE
 
-
            GO TO PARA-ADMIN-DASHBOARD.
+
            CLOSE FD-TEACHER.
 
 
@@ -246,9 +255,9 @@
            DISPLAY '*                                    *'.
            DISPLAY '*        TEACHER LOGIN PORTAL        *'.
            DISPLAY '*                                    *'.
-           DISPLAY '*  USERNAME: '
+           DISPLAY '*  USERNAME: ' .
            ACCEPT F-USERNAME.
-           DISPLAY '*  PASSWORD: '
+           DISPLAY '*  PASSWORD: ' .
            ACCEPT WS-PASSWORD-TEMP.
            DISPLAY '*                                    *'.
            DISPLAY '**************************************'.
@@ -261,19 +270,24 @@
                END-READ
            ELSE
                DISPLAY "ACCOUNT DATABASE IS EMPTY."
+               GO TO MAIN
            END-IF.
 
            IF WS-FLAG = 1
                IF WS-PASSWORD-TEMP = WS-PASSWORD
                    DISPLAY "LOGGED IN"
+                   GO TO MENU-TEACHER
                ELSE
                    DISPLAY "ACCOUNT NOT FOUND"
+                   GO TO MAIN
                END-IF
            ELSE
                DISPLAY "ACCOUNT NOT FOUND"
+               GO TO MAIN
            END-IF.
 
            CLOSE FD-TEACHER.
+
 
        MENU-TEACHER.
            DISPLAY WS-BLANK.
@@ -294,22 +308,23 @@
 
 
            IF A
-              GO TO STUDENT-DATA
+               GO TO STUDENT-DATA
            ELSE IF B
-              GO TO SEARCH-PARA
+               GO TO SEARCH-PARA
            ELSE IF C
-              STOP RUN
+               GO TO STUDENT-LIST
            ELSE
-              GO TO PARA-MENU
+               GO TO MAIN
            END-IF.
 
+
        STUDENT-DATA.
-           DISPLAY "ENTER STUDENT NUMBER"
-           ACCEPT FD-STUDNUMBER
-           DISPLAY "ENTER STUDENT NAME"
-           ACCEPT FD-STUDNAME
-           DISPLAY "ENTER STUDENT SECTION"
-           ACCEPT FD-STUDSECT
+           DISPLAY "ENTER STUDENT NUMBER".
+           ACCEPT F-STUDNUMBER.
+           DISPLAY "ENTER STUDENT NAME".
+           ACCEPT F-STUDNAME.
+           DISPLAY "ENTER STUDENT SECTION".
+           ACCEPT F-STUDSECT.
 
            GO TO MODULE-PARA.
 
@@ -317,36 +332,49 @@
                WRITE F-STUDENTINFO
            CLOSE FD-STUDENT.
 
+
        MODULE-PARA.
-           DISPLAY "ENTER MODULE NUMBER"
-           ACCEPT FD-MODULENUMB
-           DISPLAY "ENTER MODULE GRADE"
-           ACCEPT FD-GRADE
+           DISPLAY "ENTER MODULE NUMBER".
+           ACCEPT F-MODULENUMB.
+           DISPLAY "ENTER MODULE GRADE".
+           ACCEPT F-GRADE.
 
            OPEN OUTPUT FD-STUDENT
                WRITE F-STUDENTINFO
            CLOSE FD-STUDENT.
 
+<<<<<<< HEAD
+=======
+           DISPLAY "INPUT MODULE GRADE AGAIN?".
+           DISPLAY "[1] = YES".
+           DISPLAY "[ANY] = NO".
+           ACCEPT WS-MOD1.
+           IF WS-MOD1 IS EQUAL TO 1
+               GO TO MODULE-PARA
+           ELSE
+               PERFORM MENU-TEACHER
+           END-IF.
+
+>>>>>>> ae673114ce21aa93c197810bf54749d7030e9acf
            DISPLAY "STUDENT DATA HAS BEEN RECORDED".
            GO TO MENU-TEACHER.
 
+       
        SEARCH-PARA.
-           INITIALIZE FD-STUDNUMBER
+           INITIALIZE F-STUDNUMBER
            DISPLAY WS-BLANK
            DISPLAY "ENTER STUDENT NUMBER: ".
-           ACCEPT FD-STUDNUMBER
-
+           ACCEPT F-STUDNUMBER
            OPEN I-O FD-STUDENT
            IF WS-FILESTATUS2 NOT EQUAL TO 35
                READ FD-STUDENT INTO WS-STUDINFO
-                   KEY IS FD-STUDNUMBER
+                   KEY IS F-STUDNUMBER
            INVALID KEY DISPLAY "NOT FOUND." GO TO MENU-TEACHER
                END-READ
            ELSE
                DISPLAY "ACCOUNT DATABASE IS EMPTY."
                GO TO MENU-TEACHER
            END-IF.
-
            DISPLAY WS-BLANK
            DISPLAY '**************************************'.
            DISPLAY '*                                    *'.
@@ -358,7 +386,8 @@
            DISPLAY '*                                    *'.
            DISPLAY '**************************************'.
            ACCEPT WS-MENU
-
            GO TO MENU-TEACHER
            CLOSE FD-STUDENT.
 
+       
+       STUDENT-LIST.
