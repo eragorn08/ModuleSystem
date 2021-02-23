@@ -148,7 +148,7 @@
            DISPLAY '*                                    *'.
            DISPLAY '*  USERNAME: ' .
            ACCEPT WS-ADMINUSERNAME.
-           DISPLAY '*  PASSWORD: ' .
+           DISPLAY '*  PASSWORD: ' . 
            ACCEPT WS-ADMINPASSWORD.
            DISPLAY '*                                    *'.
            DISPLAY '**************************************'.
@@ -352,6 +352,7 @@
 
        STUDENT-DATA.
            INITIALIZE F-STUDENTINFO
+           
            DISPLAY WS-BLANK
            DISPLAY WS-BLANK
            DISPLAY '**************************************'
@@ -518,7 +519,7 @@
                    DELETE FD-STUDENT RECORD
                        NOT INVALID KEY DISPLAY "STUDENT DATA DELETED."
                    END-DELETE
-               ELSE
+               ELSE	
                    GO TO MENU-TEACHER
                END-IF
            ELSE
