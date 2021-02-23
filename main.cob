@@ -44,11 +44,11 @@
 
        FD FD-SUMMARY.
        01 F-SUMMARYINFO.
-          05 FD-PASS PIC X(2).
-          05 FD-FAIL PIC X(2).
-          05 FD-SUBMITTED PIC X(2).
-          05 FD-NSUBMITTED PIC X(2).
-          05 FD-STUDENTS PIC X(2).
+          05 FD-PASS PIC 9(2).
+          05 FD-FAIL PIC 9(2).
+          05 FD-SUBMITTED PIC 9(2).
+          05 FD-NSUBMITTED PIC 9(2).
+          05 FD-STUDENTS PIC 9(2).
 
        WORKING-STORAGE SECTION.
        01  WS-MENU        PIC A.
@@ -94,22 +94,24 @@
            05 WS-MODULESTATUS PIC X(9).
 
        01  WS-EOF PIC A(1).
+           88 EOF VALUE 'F'.
        01  WS-MOD1 PIC 9.
        01  WS-NUM PIC 9(2).
        01  WS-MODULE PIC 9(4).
 
       *SUMMARIZED DATABASE
        01 SUMMARYINFO.
-          05 PASS PIC X(2).
-          05 FAIL PIC X(2).
-          05 SUBMITTED PIC X(2).
-          05 NSUBMITTED PIC X(2).
-          05 STUDENTS PIC X(2).
+          05 PASS PIC 9(2).
+          05 FAIL PIC 9(2).
+          05 SUBMITTED PIC 9(2).
+          05 NSUBMITTED PIC 9(2).
+          05 STUDENTS PIC 9(2).
 
 
        PROCEDURE DIVISION.
        MAIN.
            PERFORM PARA-MENU WITH TEST BEFORE UNTIL QUIT = 1.
+           PERFORM PARA-SUMMARY.
            STOP RUN.
 
        PARA-MENU.
@@ -607,4 +609,42 @@
            CLOSE FD-STUDENT.
            
            GO TO MENU-TEACHER.
+           
+       PARA-SUMMARY.
+           MOVE "T" TO WS-EOF.
+           OPEN I-O FD-STUDENT
+               IF WS-FILESTATUS NOT EQUAL TO 35
+               
+                PERFORM UNTIL WS-EOF = "F"
+                READ FD-STUDENT NEXT RECORD INTO WS-STUDINFO
+                  AT END MOVE "F" TO WS-EOF
+                  NOT AT END 
+                   ADD 1 TO STUDENTS
+
+                   IF WS-GRADE > 74
+                       ADD 1 TO PASS
+                   else
+                       ADD 1 TO FAIL
+
+                   IF WS-MODULESTATUS EQUALS "SUBMITTED"
+                       ADD 1 TO SUBMITTED
+                   ELSE 
+                       ADD 1 TO NSUBMITTED
+                 END-PERFORM
+                 
+                ELSE
+                   DISPLAY "ACCOUNT DATABASE IS EMPTY."
+                 END-IF
+           CLOSE FD-STUDENT.
+
+           OPEN OUTPUT FD-SUMMARY.
+               MOVE SUMMARYINFO TO F-SUMMARYINFO
+               WRITE F-SUMMARYINFO
+           CLOSE FD-SUMMARY.
+
+           DISPLAY 'STUDENTS: ' STUDENTS.
+           DISPLAY 'PASS: ' PASS.
+           DISPLAY 'FAIL: ' FAIL.
+           DISPLAY 'SUBMITTED: ' SUBMITTED.
+           DISPLAY 'NOT YET PA: ' NSUBMITTED.
            
