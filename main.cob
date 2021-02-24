@@ -18,7 +18,7 @@
            RECORD KEY IS F-STUDNUMBER
            FILE STATUS IS WS-FILESTATUS2.
 
-           SELECT FD-SUMMARY ASSIGN TO 'SUMMARY.dat'
+           SELECT FD-SUMMARY ASSIGN TO 'SUMMARY.txt'
            ORGANIZATION IS SEQUENTIAL
            ACCESS IS SEQUENTIAL
            FILE STATUS IS WS-FS.
@@ -94,7 +94,6 @@
            05 WS-MODULESTATUS PIC X(9).
 
        01  WS-EOF PIC A(1).
-           88 EOF VALUE 'F'.
        01  WS-MOD1 PIC 9.
        01  WS-NUM PIC 9(2).
        01  WS-MODULE PIC 9(4).
@@ -111,7 +110,7 @@
        PROCEDURE DIVISION.
        MAIN.
            PERFORM PARA-MENU WITH TEST BEFORE UNTIL QUIT = 1.
-           PERFORM PARA-SUMMARY.
+           PERFORM PARA-SUMMARY
            STOP RUN.
 
        PARA-MENU.
@@ -150,7 +149,7 @@
            DISPLAY '*                                    *'.
            DISPLAY '*  USERNAME: ' .
            ACCEPT WS-ADMINUSERNAME.
-           DISPLAY '*  PASSWORD: ' . 
+           DISPLAY '*  PASSWORD: ' .
            ACCEPT WS-ADMINPASSWORD.
            DISPLAY '*                                    *'.
            DISPLAY '**************************************'.
@@ -354,7 +353,6 @@
 
        STUDENT-DATA.
            INITIALIZE F-STUDENTINFO
-           
            DISPLAY WS-BLANK
            DISPLAY WS-BLANK
            DISPLAY '**************************************'
@@ -521,7 +519,7 @@
                    DELETE FD-STUDENT RECORD
                        NOT INVALID KEY DISPLAY "STUDENT DATA DELETED."
                    END-DELETE
-               ELSE	
+               ELSE
                    GO TO MENU-TEACHER
                END-IF
            ELSE
@@ -551,9 +549,9 @@
 
 
        STUDENT-LIST.
-           
-      *LIST BY SECTION (DEFAULT=SECTION OF TEACHER)
-       
+
+      *SEARCH BY SECTION (DEFAULT=SECTION OF TEACHER)
+
            INITIALIZE WS-STUDINFO, F-STUDENTINFO
 
            DISPLAY WS-BLANK
@@ -569,7 +567,7 @@
                READ FD-STUDENT NEXT RECORD INTO WS-STUDINFO
                    AT END MOVE "F" TO WS-EOF
                END-READ
-               
+
                IF WS-STUDSECT = F-SECTION
                    DISPLAY "[" WS-NUM "]" WS-STUDINFO
                    ADD 1 TO WS-NUM
@@ -577,39 +575,54 @@
 
            END-PERFORM
            CLOSE FD-STUDENT.
-           
-           
-      *LIST BY MODULE NUMBER
-          
+
+
+      *SEARCH BY MODULE NUMBER
+
            DISPLAY WS-BLANK
            DISPLAY WS-BLANK
+           DISPLAY "SEARCH BY MODULE? "
+           DISPLAY "[A] => YES"
+           DISPLAY "[ANY] => EXIT"
+           DISPLAY "ENTER OPERATION: "
+           ACCEPT WS-MENU
            
+           IF A
+               GO TO STUDENT-LIST-MODULE
+           ELSE
+               GO TO MENU-TEACHER
+           END-IF.
+               
+               
+       STUDENT-LIST-MODULE.
+           DISPLAY WS-BLANK
            DISPLAY "MODULE NUMBER: "
            ACCEPT WS-MODULE
-           
+
            DISPLAY "MODULE: " WS-MODULE
 
            MOVE WS-MODULE TO F-MODULENUMB
            MOVE 1 TO WS-NUM
            MOVE "T" TO WS-EOF
-           
+
+           INITIALIZE WS-STUDINFO
+
            OPEN INPUT FD-STUDENT
-           PERFORM UNTIL WS-EOF = "F"
-               READ FD-STUDENT NEXT RECORD INTO WS-STUDINFO
-                   AT END MOVE "F" TO WS-EOF
-               END-READ
+           PERFORM WITH TEST BEFORE UNTIL WS-EOF = "F"
                
+               READ FD-STUDENT NEXT RECORD INTO WS-STUDINFO
+                   AT END 
+                       MOVE "F" TO WS-EOF
+                       CLOSE FD-STUDENT
+                       GO TO MENU-TEACHER
+               END-READ
+
                IF F-MODULENUMB = WS-MODULE
                    DISPLAY "[" WS-NUM "]" WS-STUDINFO
                    ADD 1 TO WS-NUM
                END-IF
-               
-               
-           END-PERFORM
-           CLOSE FD-STUDENT.
-           
-           GO TO MENU-TEACHER.
-           
+           END-PERFORM.
+
        PARA-SUMMARY.
            MOVE "T" TO WS-EOF.
            OPEN I-O FD-STUDENT
@@ -617,26 +630,33 @@
                
                 PERFORM UNTIL WS-EOF = "F"
                 READ FD-STUDENT NEXT RECORD INTO WS-STUDINFO
-                  AT END MOVE "F" TO WS-EOF
-                  NOT AT END 
-                   ADD 1 TO STUDENTS
+                  AT END 
+                    MOVE "F" TO WS-EOF 
+                    CLOSE FD-STUDENT
+                    GO TO PARA-SUMMARY2
+                END-READ
+                 
+                 ADD 1 TO STUDENTS
 
                    IF WS-GRADE > 74
                        ADD 1 TO PASS
-                   else
+                   ELSE
                        ADD 1 TO FAIL
+                   END-IF
 
                    IF WS-MODULESTATUS EQUALS "SUBMITTED"
                        ADD 1 TO SUBMITTED
                    ELSE 
                        ADD 1 TO NSUBMITTED
+                   END-IF
                  END-PERFORM
-                 
+
                 ELSE
                    DISPLAY "ACCOUNT DATABASE IS EMPTY."
-                 END-IF
-           CLOSE FD-STUDENT.
-
+                 END-IF.
+           
+       
+       PARA-SUMMARY2.
            OPEN OUTPUT FD-SUMMARY.
                MOVE SUMMARYINFO TO F-SUMMARYINFO
                WRITE F-SUMMARYINFO
