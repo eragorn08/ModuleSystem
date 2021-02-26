@@ -62,6 +62,7 @@
 
        01  QUIT            PIC 9  VALUE 0.
        01  WS-BLANK        PIC X(25) VALUE SPACES.
+       01  GETCH           PIC X.
 
       *FILE STATUS
        01  WS-FILESTATUS PIC 9(2).
@@ -110,7 +111,6 @@
        PROCEDURE DIVISION.
        MAIN.
            PERFORM PARA-MENU WITH TEST BEFORE UNTIL QUIT = 1.
-           PERFORM PARA-SUMMARY
            STOP RUN.
 
        PARA-MENU.
@@ -346,6 +346,8 @@
                GO TO SEARCH-PARA
            ELSE IF C
                GO TO STUDENT-LIST
+           ELSE IF D
+               GO TO PARA-SUMMARY
            ELSE
                GO TO MAIN
            END-IF.
@@ -405,7 +407,7 @@
 
            MOVE 'SUBMITTED' TO F-MODULESTATUS
 
-           OPEN I-O FD-STUDENT
+           OPEN OUTPUT FD-STUDENT
                WRITE F-STUDENTINFO
            CLOSE FD-STUDENT.
 
@@ -563,9 +565,12 @@
            MOVE 1 TO WS-NUM
 
            OPEN INPUT FD-STUDENT
-           PERFORM UNTIL WS-EOF = "F"
+            PERFORM WITH TEST BEFORE UNTIL WS-EOF = "F"
+               
                READ FD-STUDENT NEXT RECORD INTO WS-STUDINFO
-                   AT END MOVE "F" TO WS-EOF
+                   AT END 
+                       MOVE "F" TO WS-EOF
+                       CLOSE FD-STUDENT
                END-READ
 
                IF WS-STUDSECT = F-SECTION
@@ -667,4 +672,6 @@
            DISPLAY 'FAIL: ' FAIL.
            DISPLAY 'SUBMITTED: ' SUBMITTED.
            DISPLAY 'NOT YET PA: ' NSUBMITTED.
-           
+           DISPLAY WS-BLANK.
+           DISPLAY 'PRESS ANY KEY TO CONTINUE.'
+           ACCEPT GETCH.
